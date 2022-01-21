@@ -1,13 +1,14 @@
 import pygame,sys,os
 from pygame.constants import K_ESCAPE,K_RSHIFT, K_SPACE, TIMER_RESOLUTION,K_a, K_d, K_x
 pygame.init()
-
+resources=[]
 def r(relative_path):
+    
     try:
         base_path=sys._MEIPASS
     except Exception:
         base_path=os.path.abspath(".")
-
+    resources.append(f"('{relative_path}','{base_path}')")
     return os.path.join(base_path,relative_path)
 
 #Variables
@@ -21,7 +22,7 @@ APS=0.3
 Tile_Size=(50,50)
 Player_Scale=1/5
 Gravity=15
-Jump_CoolDown=700
+Jump_CoolDown=1000
 Kunai_Speed=30
 Zombie_Speed=2
 Kill_Distance=50
@@ -31,6 +32,7 @@ Zombie_Health=100
 Player_Health=500
 Kunai_Damage=5
 pygame.mouse.set_visible(False)
+pygame.display.set_caption('Ninja Fighting Simulator!')
 
 #Sound Effects
 Jump=pygame.mixer.Sound(r("SoundEffects/Jump.wav"))
@@ -282,8 +284,12 @@ class PLAYER(pygame.sprite.Sprite):
                 self.images=PLAYER.Jump_Left
 
         #Controls
-        pygame.event.get()
-        move=pygame.key.get_pressed()       
+        events=pygame.event.get()
+        move=pygame.key.get_pressed()  
+        for event in events:
+            if event.type==pygame.QUIT:
+                sys.exit()
+
         if move[K_d] and self.ThrowEnded==True:
             self.velx=Speed
             self.Left=False
@@ -371,6 +377,8 @@ class PLAYER(pygame.sprite.Sprite):
         if self.Health==0:
             self.Dead=True
             self.image=PLAYER.Dead[9]
+        if self.Dead:
+            sys.exit()
                 
         #Update
         if self.Dead==False:
@@ -607,6 +615,7 @@ for Zombie_Spawn in Zombie_Spawn_List:
     zombie=ZOMBIE(Zombie_Spawn)
     Zombies_List.append(zombie)
     Zombie_Group.add(zombie)
+    
 while 1:
     if Player_Sprite.rect.x>Width and Current_Map<len(WORLD.World):
         Player_Sprite.rect.x=200
@@ -623,6 +632,10 @@ while 1:
             Zombie_Group.add(zombie)
         for Decor in Decoration_List:
             Decorations_Group.add(DECORATIONS(Decor[0],(Decor[1],Decor[2])))
+
+    if Player_Sprite.rect.y>Height:
+        Player_Sprite.Dead=True
+
     Clock.tick(FPS)
     Screen.blit(BackGround,(0,0))
     World_Group.draw(Screen)
@@ -635,6 +648,6 @@ while 1:
     Kunai_Group.draw(Screen)
     Kunai_Sprite.Movements()
     pygame.display.flip()
-    if PLAYER().Dead==True:
+    if Player_Sprite.Dead==True:
         pygame.time.delay(500)
         exit()
