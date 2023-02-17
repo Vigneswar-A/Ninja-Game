@@ -446,6 +446,8 @@ class KUNAI(pygame.sprite.Sprite):
             if self.rect.x>Width+Kunai_Speed*100:
                 self.Movement=False
                 Player_Sprite.Kunai_CoolDown=False
+
+        
                 
 Kunai_Sprite=KUNAI()
 Kunai_Group=pygame.sprite.Group(Kunai_Sprite)
